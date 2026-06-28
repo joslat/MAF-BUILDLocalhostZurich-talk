@@ -1,0 +1,4 @@
+# Microsoft Agent Framework — Python demo samples
+# The meta-package pulls the openai client, orchestrations (handoff), and hyperlight (CodeAct).
+agent-framework==1.9.0
+python-dotenv>=1.0

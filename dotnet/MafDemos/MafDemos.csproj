@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>MafDemos</RootNamespace>
+    <AssemblyName>MafDemos</AssemblyName>
+    <!-- Console emoji + box-drawing render correctly on Windows terminals -->
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Microsoft Agent Framework (MAF) 1.10.0 -->
+    <PackageReference Include="Microsoft.Agents.AI" Version="1.10.0" />
+    <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.10.0" />
+    <PackageReference Include="Microsoft.Agents.AI.Workflows" Version="1.10.0" />
+    <!-- Microsoft.Extensions.AI abstractions (IChatClient, AIFunctionFactory, ...) -->
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.6.0" />
+    <!-- Model backends: Azure OpenAI (primary) + OpenAI (provider-swap fallback).
+         The OpenAI package (OpenAIClient) comes transitively via Microsoft.Agents.AI.OpenAI. -->
+    <PackageReference Include="Azure.AI.OpenAI" Version="2.8.0-beta.1" />
+  </ItemGroup>
+
+</Project>
