@@ -16,8 +16,8 @@ Built and verified against **Microsoft Agent Framework 1.10.0** on **.NET 9**.
 
 > **Two apps live in this folder.** The `MafDemos` menu app above (MAF **1.10.0**), plus
 > **`AgentEvalMafEvals`** — a focused sample that scores a MAF agent with
-> [AgentEval](https://www.nuget.org/packages/AgentEval) through MAF **1.11.1**'s evaluation feature
-> (`agent.EvaluateAsync`) and renders an HTML report. See **[§6](#6-agenteval-evals-agentevalmafevals--maf-1111)**.
+> [AgentEval](https://www.nuget.org/packages/AgentEval) through MAF's evaluation feature
+> (`agent.EvaluateAsync`, in `Microsoft.Agents.AI` since **1.2.0**) and renders an HTML report. See **[§6](#6-agenteval-evals-agentevalmafevals--maf-1111)**.
 
 ---
 
@@ -76,7 +76,7 @@ These samples were written against the **actual 1.10.0 API**, not an earlier dra
 | Return-to-previous | `.EnableReturnToPrevious()` | doesn't exist — add **reverse handoffs** (`WithHandoffs([specialists], triage)`) |
 | Streamed event | `AgentResponseUpdateEvent` ✓ | `AgentResponseUpdateEvent` — `.Update.Text`, `.Update.AuthorName`, `.ExecutorId` |
 | Handoff function | `handoff_to_<agent>` | `handoff_to_<index>` (per-source 1-based) — so we name the hop from the *next* speaker |
-| Evaluation | `LocalEvaluator` / `agent.EvaluateAsync(...)` / `ExpectedToolCall` | **not in 1.10.0** — S2 inspects `response.Messages → FunctionCallContent` itself. *(It shipped for real in **1.11.1** — see the `AgentEvalMafEvals` project, [§6](#6-agenteval-evals-agentevalmafevals--maf-1111).)* |
+| Evaluation | `LocalEvaluator` / `agent.EvaluateAsync(...)` / `ExpectedToolCall` | **These exist** — present in `Microsoft.Agents.AI` since **1.2.0** (Apr 2026, PR #4914). The earlier "fictional" note was wrong; S2 just keeps it offline/free with manual `FunctionCallContent` checks. *(For the real eval API, see the `AgentEvalMafEvals` project, [§6](#6-agenteval-evals-agentevalmafevals--maf-1111).)* |
 | Approval content | `FunctionApprovalRequestContent` / `req.FunctionCall` | `ToolApprovalRequestContent` / `req.ToolCall` (cast to `FunctionCallContent`) / `req.CreateResponse(bool)` |
 | Approval wrapper | `new ApprovalRequiredAIFunction(AIFunctionFactory.Create(...))` ✓ | same ✓ |
 | Session | `agent.CreateSessionAsync()` ✓ | `agent.CreateSessionAsync()` → `AgentSession`; `agent.RunAsync(messages, session)` → `AgentResponse` ✓ |
@@ -93,9 +93,10 @@ These samples were written against the **actual 1.10.0 API**, not an earlier dra
 ## 6. AgentEval evals (`AgentEvalMafEvals`) — MAF 1.11.1
 
 A second, focused console app: it scores a real MAF agent with
-**[AgentEval](https://www.nuget.org/packages/AgentEval)** metrics using MAF **1.11.1**'s built-in
-evaluation feature (`agent.EvaluateAsync`), then renders the result to a self-contained **HTML report**.
-Everything comes from NuGet — `AgentEval 0.13.2-beta`, which depends on `Microsoft.Agents.AI 1.11.1`.
+**[AgentEval](https://www.nuget.org/packages/AgentEval)** metrics using MAF's built-in evaluation
+feature (`agent.EvaluateAsync` — in `Microsoft.Agents.AI` since **1.2.0**, Apr 2026), then renders the
+result to a self-contained **HTML report**. Everything comes from NuGet — `AgentEval 0.13.2-beta`, which
+depends on `Microsoft.Agents.AI 1.11.1` (the version this sample builds against).
 
 **Flat metrics + Agentic benchmarks** run via MAF's native **`IAgentEvaluator`**
 (`agent.EvaluateAsync(queries, evaluator)`) — that path forwards the *full* `EvalItem.Conversation`, so

@@ -4,9 +4,11 @@
 // The same query is sent to two agent builds:
 //   • "good" is told to CALL the refund tool   → should issue the refund   (green)
 //   • "lazy" is told to just reassure          → answers from memory       (red)
-// We then score each build with two offline checks. There is no MAF `LocalEvaluator` /
-// `EvaluateAsync` API — the honest way to evaluate is to inspect the real run response:
-// look for a `FunctionCallContent` with the expected tool name, and keyword-check the text.
+// We then score each build with two offline checks. MAF *does* ship a built-in eval API
+// (agent.EvaluateAsync / IAgentEvaluator, in Microsoft.Agents.AI since 1.2.0, Apr 2026) — here we
+// deliberately keep it offline and free: inspect the real run response — look for a
+// `FunctionCallContent` with the expected tool name, and keyword-check the text.
+// (For the real eval API in action, see dotnet/AgentEvalMafEvals.)
 
 using System.ComponentModel;
 using MafDemos.Infrastructure;
