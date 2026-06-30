@@ -18,6 +18,9 @@
     <PackageReference Include="Microsoft.Agents.AI" Version="1.10.0" />
     <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.10.0" />
     <PackageReference Include="Microsoft.Agents.AI.Workflows" Version="1.10.0" />
+    <!-- Agent Harness (Sample 4) — the real HarnessAgent: planning (todos), plan/execute modes,
+         compaction, and built-in tool approval. Preview package matching MAF 1.10.0. -->
+    <PackageReference Include="Microsoft.Agents.AI.Harness" Version="1.10.0-preview.260610.1" />
     <!-- Microsoft.Extensions.AI abstractions (IChatClient, AIFunctionFactory, ...) -->
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.6.0" />
     <!-- Model backends: Azure OpenAI (primary) + OpenAI (provider-swap fallback).

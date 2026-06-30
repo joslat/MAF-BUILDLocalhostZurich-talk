@@ -7,12 +7,13 @@ A single, beautiful console app that runs the on-stage **Microsoft Agent Framewo
 | 1 | **Handoff you can watch** | Triage routes to Orders/Returns; Returns escalates one-way to a terminal Fraud agent — every hop printed live | ✅ |
 | 2 | **Evals: green vs. red** | The same query against two agent builds — one calls the refund tool (green), one doesn't (red) | ✅ |
 | 3 | **CodeAct head-to-head** | Tool-calling vs. one sandboxed program | Python-only* |
-| 4 | **Harness approval gate** | A risky shell tool that needs a human "yes" before it runs | ✅ |
+| 4 | **A real agent harness** | `AsHarnessAgent`: a HarnessAgent that plans with a todo list, executes tools, then asks before it books | ✅ |
 | 5 | **ShopBot — the finale** | One app that cooperates (handoff), acts (approval-gated refund), and is tested (eval) | ✅ |
 
 `*` CodeAct is Python-only today (.NET "coming soon"); menu item 3 explains it and points at the Python demo.
 
-Built and verified against **Microsoft Agent Framework 1.10.0** on **.NET 9**.
+Built and verified against **Microsoft Agent Framework 1.10.0** on **.NET 9** (Sample 4 also pulls
+`Microsoft.Agents.AI.Harness` **1.10.0-preview** for the real `AsHarnessAgent`).
 
 > **Two apps live in this folder.** The `MafDemos` menu app above (MAF **1.10.0**), plus
 > **`AgentEvalMafEvals`** — a focused sample that scores a MAF agent with
@@ -61,7 +62,7 @@ dotnet/MafDemos/
 └─ Samples/
    ├─ S1_Handoff.cs            handoff workflow + live streaming run loop
    ├─ S2_Evals.cs             two builds + honest tool-call / keyword checks
-   ├─ S4_Harness.cs           ApprovalRequiredAIFunction + approval loop
+   ├─ S4_Harness.cs           AsHarnessAgent: plan (todos) → execute → human gate → book
    └─ S5_ShopBot.cs           all three pillars on one cast
 ```
 
@@ -80,12 +81,13 @@ These samples were written against the **actual 1.10.0 API**, not an earlier dra
 | Approval content | `FunctionApprovalRequestContent` / `req.FunctionCall` | `ToolApprovalRequestContent` / `req.ToolCall` (cast to `FunctionCallContent`) / `req.CreateResponse(bool)` |
 | Approval wrapper | `new ApprovalRequiredAIFunction(AIFunctionFactory.Create(...))` ✓ | same ✓ |
 | Session | `agent.CreateSessionAsync()` ✓ | `agent.CreateSessionAsync()` → `AgentSession`; `agent.RunAsync(messages, session)` → `AgentResponse` ✓ |
+| Agent harness | (not in the draft guide) | **`chatClient.AsHarnessAgent(HarnessAgentOptions)`** → `HarnessAgent` (package `Microsoft.Agents.AI.Harness`, preview): a `TodoProvider` (planning), `AgentModeProvider` (plan/execute), compaction, and tool approval are all pre-wired. Its full interactive UX lives in the sample-only reactive **`HarnessConsole`**, whose runner *injects* approval responses mid-run — so outside that runner, gate a risky step with a normal follow-up turn (Sample 4 does). |
 
 > The framework is young and evolving; package names and a few signatures drift between releases. Everything here compiles and runs against 1.10.0.
 
 ## 5. Safety notes
 
-- **Sample 4's shell tool is simulated** — it never executes a real command. In production, run it inside an isolated environment (container / VM) and keep approvals on.
+- **Sample 4's `book_trip` tool is simulated** — it never books or charges anything. A real harness can run shell / file tools; in production keep tool approval on and run the executor inside an isolated environment (container / VM).
 - The samples use an **API key** (`AzureKeyCredential`) for simplicity. In production, prefer a managed identity / specific `TokenCredential`.
 
 ---

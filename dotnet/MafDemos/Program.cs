@@ -2,7 +2,7 @@
 // Microsoft Agent Framework — Build & Run the Demo Samples (.NET)
 //
 // A single console app with a menu that runs the on-stage samples:
-//   1 Handoff · 2 Evals · 3 CodeAct (Python-only) · 4 Harness approval · 5 ShopBot
+//   1 Handoff · 2 Evals · 3 CodeAct (Python-only) · 4 Agent harness · 5 ShopBot
 //
 // The one shared requirement is a chat model (see Infrastructure/Chat.cs).
 
@@ -30,7 +30,7 @@ var samples = new (string Key, string Title, string Blurb, Func<IChatClient, Tas
     ("1", "Handoff you can watch", "Triage routes; Returns escalates one-way to Fraud", S1_Handoff.RunAsync),
     ("2", "Evals: green vs. red", "Same query, two builds — does each call the tool?", S2_Evals.RunAsync),
     ("3", "CodeAct head-to-head", "Python-only today (.NET \"coming soon\")", null),
-    ("4", "Harness approval gate", "A risky shell tool needs a human \"yes\"", S4_Harness.RunAsync),
+    ("4", "A real agent harness", "Plans with todos, executes, asks before it books", S4_Harness.RunAsync),
     ("5", "ShopBot — the finale", "Cooperate + Act + Tested, in one small app", S5_ShopBot.RunAsync),
 };
 
