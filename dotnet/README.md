@@ -14,6 +14,11 @@ A single, beautiful console app that runs the on-stage **Microsoft Agent Framewo
 
 Built and verified against **Microsoft Agent Framework 1.10.0** on **.NET 9**.
 
+> **Two apps live in this folder.** The `MafDemos` menu app above (MAF **1.10.0**), plus
+> **`AgentEvalMafEvals`** — a focused sample that scores a MAF agent with
+> [AgentEval](https://www.nuget.org/packages/AgentEval) through MAF **1.11.1**'s evaluation feature
+> (`agent.EvaluateAsync`) and renders an HTML report. See **[§6](#6-agenteval-evals-agentevalmafevals--maf-1111)**.
+
 ---
 
 ## 1. Prerequisites
@@ -71,7 +76,7 @@ These samples were written against the **actual 1.10.0 API**, not an earlier dra
 | Return-to-previous | `.EnableReturnToPrevious()` | doesn't exist — add **reverse handoffs** (`WithHandoffs([specialists], triage)`) |
 | Streamed event | `AgentResponseUpdateEvent` ✓ | `AgentResponseUpdateEvent` — `.Update.Text`, `.Update.AuthorName`, `.ExecutorId` |
 | Handoff function | `handoff_to_<agent>` | `handoff_to_<index>` (per-source 1-based) — so we name the hop from the *next* speaker |
-| Evaluation | `LocalEvaluator` / `agent.EvaluateAsync(...)` / `ExpectedToolCall` | **fictional** — inspect `response.Messages → FunctionCallContent` yourself |
+| Evaluation | `LocalEvaluator` / `agent.EvaluateAsync(...)` / `ExpectedToolCall` | **not in 1.10.0** — S2 inspects `response.Messages → FunctionCallContent` itself. *(It shipped for real in **1.11.1** — see the `AgentEvalMafEvals` project, [§6](#6-agenteval-evals-agentevalmafevals--maf-1111).)* |
 | Approval content | `FunctionApprovalRequestContent` / `req.FunctionCall` | `ToolApprovalRequestContent` / `req.ToolCall` (cast to `FunctionCallContent`) / `req.CreateResponse(bool)` |
 | Approval wrapper | `new ApprovalRequiredAIFunction(AIFunctionFactory.Create(...))` ✓ | same ✓ |
 | Session | `agent.CreateSessionAsync()` ✓ | `agent.CreateSessionAsync()` → `AgentSession`; `agent.RunAsync(messages, session)` → `AgentResponse` ✓ |
@@ -82,3 +87,62 @@ These samples were written against the **actual 1.10.0 API**, not an earlier dra
 
 - **Sample 4's shell tool is simulated** — it never executes a real command. In production, run it inside an isolated environment (container / VM) and keep approvals on.
 - The samples use an **API key** (`AzureKeyCredential`) for simplicity. In production, prefer a managed identity / specific `TokenCredential`.
+
+---
+
+## 6. AgentEval evals (`AgentEvalMafEvals`) — MAF 1.11.1
+
+A second, focused console app: it scores a real MAF agent with
+**[AgentEval](https://www.nuget.org/packages/AgentEval)** metrics using MAF **1.11.1**'s built-in
+evaluation feature (`agent.EvaluateAsync`), then renders the result to a self-contained **HTML report**.
+Everything comes from NuGet — `AgentEval 0.13.2-beta`, which depends on `Microsoft.Agents.AI 1.11.1`.
+
+**Flat metrics + Agentic benchmarks** run via MAF's native **`IAgentEvaluator`**
+(`agent.EvaluateAsync(queries, evaluator)`) — that path forwards the *full* `EvalItem.Conversation`, so
+even AgentEval's code-based tool metrics see the real tool calls. **Red-team** (OWASP / MITRE / NIST)
+runs via AgentEval's **`ScanAsync`** pipeline (adversarial probes, judge-graded) — a scan can't be a
+fixed-query `IEvaluator`, so that path uses an AgentEval `IStreamableAgent` instead.
+
+> `MafDemos` stays on MAF 1.10.0; this project is separate and targets 1.11.1, so the two coexist in
+> the solution without touching each other.
+
+### Run
+
+```bash
+cd dotnet/AgentEvalMafEvals
+dotnet run                                  # interactive MENU — pick a benchmark, run, repeat
+dotnet run -- --benchmark agentic-execution # one-shot: flat metrics + that benchmark, then exit
+dotnet run -- --no-open                     # CI/scripted: default benchmark, write but don't launch
+```
+
+Same model env vars as `MafDemos` (Azure OpenAI first, then OpenAI). Reports land in
+`dotnet/AgentEvalMafEvals/output/agenteval-*.html`.
+
+### Three categories (a looping menu)
+
+```
+[1] Flat metrics            native IAgentEvaluator — custom metric bundle
+[2] Agentic benchmark…      → submenu: smoke / standard / audit-grade tiers, the reasoning ·
+                                        user-experience · adversarial-direct · rag-quality presets,
+                                        and a Full suite (all 7 single-response categories incl. Safety)
+[3] Red-team benchmark…     → submenu: OWASP / MITRE / NIST  →  smoke / standard / audit-grade
+[q] Quit
+```
+
+Each run is fault-tolerant — if a judge rubric trips the provider content filter, that run is skipped
+with a message and you return to the menu.
+
+### Inside
+
+```
+dotnet/AgentEvalMafEvals/
+├─ Program.cs                     thin entry — setup + dispatch to EvalApp
+├─ EvalApp.cs                     wires agents/runners/reporter; drives the category menu
+├─ Tools/      TravelTools        the domain tools (SearchFlights, SearchHotels)
+├─ Agents/     TravelAgentFactory builds the MAF AIAgent + the AgentEval IStreamableAgent
+├─ Infrastructure/                AiBackend (client+judge) · Output (console) · Menu (reusable picker)
+├─ Evaluation/                    MafEvalRunner · BenchmarkCatalog/Selector (Agentic) · RedTeamCatalog (OWASP/MITRE/NIST) · EvalRun
+└─ Reporting/  HtmlReportWriter   EvalResult tree → HtmlEvalResultRenderer → save + open
+```
+
+Background: AgentEval's [`using-agenteval-with-maf-evals.md`](https://github.com/AgentEvalHQ/AgentEval/blob/main/docs/using-agenteval-with-maf-evals.md).

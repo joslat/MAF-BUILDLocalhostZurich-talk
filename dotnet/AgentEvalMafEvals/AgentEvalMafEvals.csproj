@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>AgentEvalMafEvals</RootNamespace>
+    <AssemblyName>AgentEvalMafEvals</AssemblyName>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- AgentEval (NuGet, prerelease). Brings:
+           • AgentEval.MAF      → AgentEvalEvaluators, AsAgentEvaluator, AgentEvalCompositeEvaluator, MeaiToEvalResultBridge
+           • AgentEval.Core     → quality/agentic metrics, ChatClientEvaluator, HtmlEvalResultRenderer
+           • AgentEval.Evals.Agentic → AgenticBenchmark presets
+         0.13.2-beta is the first release with the MAF-native IAgentEvaluator adapters; it depends on
+         Microsoft.Agents.AI 1.11.1 (the version that ships agent.EvaluateAsync). -->
+    <PackageReference Include="AgentEval" Version="0.13.2-beta" />
+
+    <!-- Microsoft Agent Framework — the evaluation feature (agent.EvaluateAsync) + IAgentEvaluator live here. -->
+    <PackageReference Include="Microsoft.Agents.AI" Version="1.11.1" />
+
+    <!-- Model backends: Azure OpenAI (primary) + OpenAI (fallback, transitive via Azure.AI.OpenAI). -->
+    <PackageReference Include="Azure.AI.OpenAI" Version="2.8.0-beta.1" />
+    <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.6.0" />
+
+    <!-- ChatConfiguration / IEvaluator — the MEAI evaluation contract AgentEval implements. -->
+    <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Quality" Version="10.6.0" />
+  </ItemGroup>
+
+</Project>
